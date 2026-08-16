@@ -3,42 +3,60 @@ import { useState } from "react";
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
-    if (username === "" || password === "") {
-      alert("Please enter Username and Password");
+    if (username === "" || password === "" || role === "") {
+      alert("Please enter username, password and select a role");
       return;
     }
 
-   if (username.trim() !== "" && password === "1234") {
-      setLoading(true);
-
-      setTimeout(() => {
-        // Mock JWT Token
-        const token =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake.payload";
-
-        // Store Token
-        localStorage.setItem("token", token);
-        localStorage.setItem("username", username);
-
-        setLoading(false);
-        alert("Login Successful");
-        onLogin();
-      }, 1000);
-    } else {
-      alert("Invalid Username or Password");
+    if (password !== "1234") {
+      alert("Invalid password");
+      return;
     }
+
+    // JWT Payload
+    const payload = {
+      username: username,
+      role: role
+    };
+
+    // JWT Header
+    const header = {
+      alg: "HS256",
+      typ: "JWT"
+    };
+
+    // Mock JWT Token
+    const token =
+      btoa(JSON.stringify(header)) +
+      "." +
+      btoa(JSON.stringify(payload)) +
+      ".mock-signature";
+
+    // Store authentication information
+    localStorage.setItem("token", token);
+    localStorage.setItem("username", username);
+    localStorage.setItem("role", role);
+
+    alert("Login Successful");
+
+    onLogin();
   };
 
   return (
     <div className="container">
       <div className="card">
-        <h1 className="title">JWT Authentication System</h1>
 
-        <h3 className="subtitle">Login Page</h3>
+        <h1 className="title">
+          JWT Authentication System
+        </h1>
+
+        <h2 className="subtitle">
+          Secure Login
+        </h2>
 
         <input
           type="text"
@@ -54,19 +72,60 @@ function Login({ onLogin }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <div style={{ textAlign: "left", marginTop: "5px" }}>
+        <div className="show-password">
           <input
             type="checkbox"
             checked={showPassword}
             onChange={() => setShowPassword(!showPassword)}
-            style={{ width: "15px" }}
-          />{" "}
+          />
           Show Password
         </div>
 
+        <h3 className="role-heading">
+          Select Role
+        </h3>
+
+        <div className="role-options">
+
+          <label>
+            <input
+              type="radio"
+              name="role"
+              value="Admin"
+              checked={role === "Admin"}
+              onChange={(e) => setRole(e.target.value)}
+            />
+            Admin
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="role"
+              value="Editor"
+              checked={role === "Editor"}
+              onChange={(e) => setRole(e.target.value)}
+            />
+            Editor
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="role"
+              value="Viewer"
+              checked={role === "Viewer"}
+              onChange={(e) => setRole(e.target.value)}
+            />
+            Viewer
+          </label>
+
+        </div>
+
         <button onClick={handleLogin}>
-          {loading ? "Logging In..." : "Login"}
+          Login
         </button>
+
       </div>
     </div>
   );
