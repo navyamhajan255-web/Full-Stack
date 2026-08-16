@@ -24,7 +24,6 @@ const defaultPosts = [
 ]
 
 function App() {
-  // Load posts from localStorage
   const [events, setEvents] = useState(() => {
     const saved = localStorage.getItem('schedulerPosts')
 
@@ -35,10 +34,7 @@ function App() {
     return defaultPosts
   })
 
-  // Manage Posts ON/OFF
   const [showManagePosts, setShowManagePosts] = useState(true)
-
-  // Add post modal
   const [showModal, setShowModal] = useState(false)
 
   const [title, setTitle] = useState('')
@@ -47,12 +43,10 @@ function App() {
   const [minute, setMinute] = useState('00')
   const [ampm, setAmpm] = useState('AM')
 
-  // Save posts whenever they change
   useEffect(() => {
     localStorage.setItem('schedulerPosts', JSON.stringify(events))
   }, [events])
 
-  // Convert 12-hour time to 24-hour time
   const convertTo24Hour = (hourValue, ampmValue) => {
     let h = Number(hourValue)
 
@@ -67,7 +61,6 @@ function App() {
     return String(h).padStart(2, '0')
   }
 
-  // Add new post
   const handleAddPost = (e) => {
     e.preventDefault()
 
@@ -92,20 +85,26 @@ function App() {
     setMinute('00')
     setAmpm('AM')
     setShowModal(false)
+    setShowManagePosts(true)
   }
 
-  // Delete post
   const handleDelete = (id) => {
-    setEvents((current) => current.filter((event) => event.id !== id))
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this post?'
+    )
+
+    if (!confirmDelete) return
+
+    setEvents((current) =>
+      current.filter((event) => event.id !== id)
+    )
   }
 
-  // Drag and drop
   const handleEventDrop = (info) => {
     const newStart = info.event.start
 
     if (!newStart) return
 
-    // Keep local time instead of UTC
     const year = newStart.getFullYear()
     const month = String(newStart.getMonth() + 1).padStart(2, '0')
     const day = String(newStart.getDate()).padStart(2, '0')
@@ -127,7 +126,6 @@ function App() {
     )
   }
 
-  // Format date nicely
   const formatDate = (dateString) => {
     const date = new Date(dateString)
 
@@ -143,8 +141,11 @@ function App() {
 
   return (
     <div className="app">
+
+      {/* HEADER */}
       <header className="hero">
         <h1>Post Scheduler</h1>
+
         <p>Plan, schedule and manage your posts.</p>
 
         <button
@@ -155,14 +156,16 @@ function App() {
         </button>
       </header>
 
-      {/* Manage Posts */}
+      {/* MANAGE POSTS */}
       <section className="manage-section">
+
         <div className="manage-header">
           <h2>Manage Posts</h2>
 
-          {/* REAL ON/OFF TOGGLE */}
           <div className="toggle-container">
-            <span>{showManagePosts ? 'ON' : 'OFF'}</span>
+            <span>
+              {showManagePosts ? 'ON' : 'OFF'}
+            </span>
 
             <label className="switch">
               <input
@@ -180,6 +183,7 @@ function App() {
 
         {showManagePosts && (
           <div className="posts-list">
+
             {events.length === 0 ? (
               <div className="empty-posts">
                 No posts scheduled yet.
@@ -187,9 +191,13 @@ function App() {
             ) : (
               events.map((post) => (
                 <div className="post-card" key={post.id}>
+
                   <div className="post-info">
                     <h3>{post.title}</h3>
-                    <p>{formatDate(post.start)}</p>
+
+                    <p>
+                      {formatDate(post.start)}
+                    </p>
                   </div>
 
                   <button
@@ -198,19 +206,23 @@ function App() {
                   >
                     Delete
                   </button>
+
                 </div>
               ))
             )}
+
           </div>
         )}
       </section>
 
+      {/* INSTRUCTION */}
       <div className="instruction">
         Drag and drop a post to another date or time to reschedule it.
       </div>
 
-      {/* Calendar */}
+      {/* CALENDAR */}
       <section className="calendar-section">
+
         <FullCalendar
           plugins={[
             dayGridPlugin,
@@ -225,34 +237,43 @@ function App() {
           events={events}
           eventDrop={handleEventDrop}
           height="auto"
+
           headerToolbar={{
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay',
           }}
+
           buttonText={{
             today: 'today',
             month: 'month',
             week: 'week',
             day: 'day',
           }}
+
           eventClick={(info) => {
-            alert(`Selected post: ${info.event.title}`)
+            alert(
+              `Selected post: ${info.event.title}\n${info.event.start.toLocaleString()}`
+            )
           }}
         />
+
       </section>
 
-      {/* Add New Post Modal */}
+      {/* ADD POST MODAL */}
       {showModal && (
         <div
           className="modal-overlay"
           onClick={() => setShowModal(false)}
         >
+
           <div
             className="modal"
             onClick={(e) => e.stopPropagation()}
           >
+
             <div className="modal-header">
+
               <h2>Add New Post</h2>
 
               <button
@@ -261,9 +282,11 @@ function App() {
               >
                 ×
               </button>
+
             </div>
 
             <form onSubmit={handleAddPost}>
+
               <label>Post Title</label>
 
               <input
@@ -284,51 +307,69 @@ function App() {
               <label>Time</label>
 
               <div className="time-row">
-                {/* Hour */}
+
                 <select
                   value={hour}
                   onChange={(e) => setHour(e.target.value)}
                 >
-                  {Array.from({ length: 12 }, (_, index) => {
-                    const value = String(index + 1).padStart(2, '0')
+                  {Array.from(
+                    { length: 12 },
+                    (_, index) => {
+                      const value = String(index + 1)
+                        .padStart(2, '0')
 
-                    return (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    )
-                  })}
+                      return (
+                        <option
+                          key={value}
+                          value={value}
+                        >
+                          {value}
+                        </option>
+                      )
+                    }
+                  )}
                 </select>
 
                 <span>:</span>
 
-                {/* Minute */}
                 <select
                   value={minute}
-                  onChange={(e) => setMinute(e.target.value)}
+                  onChange={(e) =>
+                    setMinute(e.target.value)
+                  }
                 >
-                  {Array.from({ length: 60 }, (_, index) => {
-                    const value = String(index).padStart(2, '0')
+                  {Array.from(
+                    { length: 60 },
+                    (_, index) => {
+                      const value = String(index)
+                        .padStart(2, '0')
 
-                    return (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    )
-                  })}
+                      return (
+                        <option
+                          key={value}
+                          value={value}
+                        >
+                          {value}
+                        </option>
+                      )
+                    }
+                  )}
                 </select>
 
-                {/* AM / PM */}
                 <select
                   value={ampm}
-                  onChange={(e) => setAmpm(e.target.value)}
+                  onChange={(e) =>
+                    setAmpm(e.target.value)
+                  }
                 >
                   <option value="AM">AM</option>
                   <option value="PM">PM</option>
                 </select>
+
               </div>
 
               <div className="modal-actions">
+
                 <button
                   type="button"
                   className="cancel-btn"
@@ -343,11 +384,16 @@ function App() {
                 >
                   Add Post
                 </button>
+
               </div>
+
             </form>
+
           </div>
+
         </div>
       )}
+
     </div>
   )
 }

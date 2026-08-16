@@ -1,324 +1,653 @@
-import { useEffect, useState } from 'react'
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
-import './App.css'
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 
-function App() {
-  const defaultPosts = [
-    {
-      id: '1',
-      title: 'Instagram Post',
-      start: '2026-08-15T10:00:00',
-    },
-    {
-      id: '2',
-      title: 'Product Launch',
-      start: '2026-08-18T14:00:00',
-    },
-    {
-      id: '3',
-      title: 'Weekly Update',
-      start: '2026-08-21T11:30:00',
-    },
-  ]
-
-  const [events, setEvents] = useState(() => {
-    const savedPosts = localStorage.getItem('schedulerPosts')
-
-    if (savedPosts) {
-      return JSON.parse(savedPosts)
-    }
-
-    return defaultPosts
-  })
-
-  const [showForm, setShowForm] = useState(false)
-
-  // NEW: Manage Posts toggle
-  const [showPosts, setShowPosts] = useState(true)
-
-  const [title, setTitle] = useState('')
-  const [date, setDate] = useState('2026-08-20')
-  const [hour, setHour] = useState('10')
-  const [minute, setMinute] = useState('00')
-  const [ampm, setAmpm] = useState('AM')
-
-  // Save posts
-  useEffect(() => {
-    localStorage.setItem('schedulerPosts', JSON.stringify(events))
-  }, [events])
-
-  // Convert AM/PM to 24 hour
-  const convertTo24Hour = () => {
-    let h = Number(hour)
-
-    if (ampm === 'AM' && h === 12) {
-      h = 0
-    }
-
-    if (ampm === 'PM' && h !== 12) {
-      h += 12
-    }
-
-    return `${String(h).padStart(2, '0')}:${minute}:00`
-  }
-
-  // Add post
-  const handleAddPost = (e) => {
-    e.preventDefault()
-
-    if (!title.trim()) {
-      alert('Please enter post title')
-      return
-    }
-
-    const newPost = {
-      id: Date.now().toString(),
-      title: title.trim(),
-      start: `${date}T${convertTo24Hour()}`,
-    }
-
-    setEvents((currentEvents) => [...currentEvents, newPost])
-
-    setTitle('')
-    setDate('2026-08-20')
-    setHour('10')
-    setMinute('00')
-    setAmpm('AM')
-
-    setShowForm(false)
-
-    // Automatically show posts after adding
-    setShowPosts(true)
-  }
-
-  // Drag & drop
-  const handleEventDrop = (info) => {
-    const movedDate = info.event.start
-
-    const year = movedDate.getFullYear()
-    const month = String(movedDate.getMonth() + 1).padStart(2, '0')
-    const day = String(movedDate.getDate()).padStart(2, '0')
-    const hours = String(movedDate.getHours()).padStart(2, '0')
-    const minutes = String(movedDate.getMinutes()).padStart(2, '0')
-
-    const newStart = `${year}-${month}-${day}T${hours}:${minutes}:00`
-
-    setEvents((currentEvents) =>
-      currentEvents.map((event) =>
-        event.id === info.event.id
-          ? {
-              ...event,
-              start: newStart,
-            }
-          : event
-      )
-    )
-  }
-
-  // Delete post
-  const handleDeletePost = (id) => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this post?'
-    )
-
-    if (!confirmDelete) return
-
-    setEvents((currentEvents) =>
-      currentEvents.filter((event) => event.id !== id)
-    )
-  }
-
-  return (
-    <div className="app">
-
-      {/* HEADER */}
-      <header className="hero">
-        <h1>Post Scheduler</h1>
-
-        <p>Plan, schedule and manage your posts.</p>
-
-        <button
-          className="add-btn"
-          onClick={() => setShowForm(!showForm)}
-        >
-          {showForm ? '✕ Close' : '+ Add New Post'}
-        </button>
-      </header>
-
-      {/* ADD POST FORM */}
-      {showForm && (
-        <div className="form-card">
-          <h2>Add New Post</h2>
-
-          <form onSubmit={handleAddPost}>
-
-            <label>Post Title</label>
-
-            <input
-              type="text"
-              placeholder="Enter post title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-
-            <label>Date</label>
-
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-
-            <label>Time</label>
-
-            <div className="time-row">
-
-              <select
-                value={hour}
-                onChange={(e) => setHour(e.target.value)}
-              >
-                {Array.from({ length: 12 }, (_, i) => {
-                  const value = String(i + 1).padStart(2, '0')
-
-                  return (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  )
-                })}
-              </select>
-
-              <span>:</span>
-
-              <select
-                value={minute}
-                onChange={(e) => setMinute(e.target.value)}
-              >
-                {Array.from({ length: 60 }, (_, i) => {
-                  const value = String(i).padStart(2, '0')
-
-                  return (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  )
-                })}
-              </select>
-
-              <select
-                value={ampm}
-                onChange={(e) => setAmpm(e.target.value)}
-              >
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-              </select>
-
-            </div>
-
-            <button className="save-btn" type="submit">
-              Save Post
-            </button>
-
-          </form>
-        </div>
-      )}
-
-      {/* MANAGE POSTS TOGGLE */}
-      <section className="manage-section">
-
-        <button
-          className="manage-toggle"
-          onClick={() => setShowPosts(!showPosts)}
-        >
-          <span>Manage Posts</span>
-
-          <span className="toggle-arrow">
-            {showPosts ? '▲' : '▼'}
-          </span>
-        </button>
-
-        {/* POSTS */}
-        {showPosts && (
-          <div className="post-list">
-
-            {events.length === 0 ? (
-              <p className="empty">
-                No posts scheduled.
-              </p>
-            ) : (
-              events.map((event) => (
-                <div className="post-item" key={event.id}>
-
-                  <div>
-                    <strong>{event.title}</strong>
-
-                    <small>
-                      {new Date(event.start).toLocaleString()}
-                    </small>
-                  </div>
-
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDeletePost(event.id)}
-                  >
-                    Delete
-                  </button>
-
-                </div>
-              ))
-            )}
-
-          </div>
-        )}
-
-      </section>
-
-      {/* CALENDAR */}
-      <section className="calendar-section">
-
-        <p className="drag-info">
-          Drag and drop a post to reschedule it.
-        </p>
-
-        <FullCalendar
-          plugins={[
-            dayGridPlugin,
-            timeGridPlugin,
-            interactionPlugin,
-          ]}
-          initialView="dayGridMonth"
-          initialDate="2026-08-15"
-          editable={true}
-          eventStartEditable={true}
-          eventDurationEditable={false}
-          events={events}
-          eventDrop={handleEventDrop}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
-          }}
-          buttonText={{
-            today: 'today',
-            month: 'month',
-            week: 'week',
-            day: 'day',
-          }}
-          eventClick={(info) => {
-            alert(
-              `${info.event.title}\n${info.event.start.toLocaleString()}`
-            )
-          }}
-          height="auto"
-        />
-
-      </section>
-
-    </div>
-  )
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #1d2942;
+  background: #f4f7fc;
 }
 
-export default App
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f4f7fc;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* =========================
+   MAIN APP
+========================= */
+
+.app {
+  min-height: 100vh;
+  padding: 30px clamp(16px, 4vw, 64px) 45px;
+  background:
+    radial-gradient(circle at 90% 0%, #dce9ff 0, transparent 26rem),
+    #f4f7fc;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.hero {
+  max-width: 1500px;
+  margin: 0 auto 24px;
+  padding: 26px 30px;
+  border: 1px solid #e3eaf5;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 35px rgba(31, 53, 98, 0.07);
+}
+
+.hero h1 {
+  margin: 0;
+  color: #202d49;
+  font: 800 clamp(25px, 3vw, 34px) / 1.2
+    'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.04em;
+}
+
+.hero p {
+  margin: 7px 0 18px;
+  color: #7b879e;
+  font-size: 14px;
+}
+
+.add-post-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 17px;
+  background: linear-gradient(135deg, #6d5dfc, #8b6ff8);
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(109, 93, 252, 0.25);
+  transition: 0.2s ease;
+}
+
+.add-post-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 22px rgba(109, 93, 252, 0.32);
+}
+
+/* =========================
+   MANAGE POSTS
+========================= */
+
+.manage-section {
+  max-width: 1500px;
+  margin: 0 auto 20px;
+  padding: 20px;
+  border: 1px solid #e3eaf5;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(31, 53, 98, 0.06);
+}
+
+.manage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.manage-header h2 {
+  margin: 0;
+  color: #293650;
+  font: 700 17px 'Plus Jakarta Sans', sans-serif;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.toggle-container > span {
+  color: #68758d;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* =========================
+   TOGGLE
+========================= */
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #cbd3df;
+  transition: 0.25s ease;
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: 0.25s ease;
+}
+
+.switch input:checked + .slider {
+  background: #6d5dfc;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+/* =========================
+   POSTS LIST
+========================= */
+
+.posts-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 17px;
+}
+
+.post-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 12px 14px;
+  border: 1px solid #edf0f6;
+  border-radius: 11px;
+  background: #f8faff;
+  transition: 0.18s ease;
+}
+
+.post-card:hover {
+  border-color: #dcd7ff;
+  background: #f5f3ff;
+  transform: translateY(-1px);
+}
+
+.post-info h3 {
+  margin: 0;
+  color: #35425c;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.post-info p {
+  margin: 4px 0 0;
+  color: #8490a5;
+  font-size: 11px;
+}
+
+.delete-btn {
+  flex-shrink: 0;
+  border: 1px solid #ffd9df;
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: #fff1f3;
+  color: #c03650;
+  font-size: 11px;
+  font-weight: 800;
+  transition: 0.18s ease;
+}
+
+.delete-btn:hover {
+  background: #ffe4e9;
+  transform: translateY(-1px);
+}
+
+.empty-posts {
+  padding: 20px;
+  border-radius: 10px;
+  background: #f8faff;
+  color: #8994a8;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* =========================
+   INSTRUCTION
+========================= */
+
+.instruction {
+  max-width: 1500px;
+  margin: 0 auto 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #eeeaff;
+  color: #6658d9;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* =========================
+   CALENDAR
+========================= */
+
+.calendar-section {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 20px;
+  overflow: hidden;
+  border: 1px solid #e3eaf5;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 14px 35px rgba(31, 53, 98, 0.07);
+}
+
+.fc {
+  color: #293650;
+  font-size: 13px;
+}
+
+.fc .fc-toolbar {
+  margin-bottom: 18px;
+}
+
+.fc .fc-toolbar-title {
+  color: #293650;
+  font: 700 20px 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.fc .fc-button {
+  border: 1px solid #dde5f1;
+  border-radius: 8px;
+  background: #fff;
+  color: #53617c;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 700;
+  transition: 0.18s ease;
+}
+
+.fc .fc-button:hover,
+.fc .fc-button:focus {
+  border-color: #796bfa;
+  background: #f0eeff;
+  color: #5d4ee8;
+  box-shadow: none;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  border-color: #796bfa;
+  background: #f0eeff;
+  color: #5d4ee8;
+}
+
+.fc .fc-today-button {
+  font-weight: 800;
+}
+
+.fc .fc-col-header-cell {
+  padding: 10px 4px;
+  border-color: #e9eef6;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: #7a86a0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.fc .fc-daygrid-day {
+  border-color: #e9eef6;
+}
+
+.fc .fc-daygrid-day-number {
+  padding: 7px 9px;
+  color: #66738d;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.fc .fc-day-today {
+  background: #f5f3ff !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  color: #6556ec;
+}
+
+.fc .fc-day-other {
+  background: #fafbfe;
+}
+
+.fc-event {
+  border: 0 !important;
+  border-left: 3px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: linear-gradient(135deg, #6d5dfc, #8876f8);
+  box-shadow: 0 3px 8px rgba(44, 56, 104, 0.18);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.fc-event:hover {
+  filter: brightness(1.07);
+  box-shadow: 0 6px 14px rgba(44, 56, 104, 0.25);
+}
+
+.fc-event-title {
+  font-weight: 700;
+}
+
+.fc-timegrid-slot {
+  height: 38px;
+  border-color: #edf1f7;
+}
+
+.fc-timegrid-slot-label {
+  color: #9aa4b6;
+  font-size: 10px;
+}
+
+.fc-timegrid-axis {
+  border-color: #e9eef6;
+}
+
+.fc-scrollgrid {
+  border-color: #e5ebf4 !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(18, 28, 55, 0.48);
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  width: 475px;
+  max-width: 100%;
+  padding: 25px;
+  border: 1px solid #e0e7f2;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(9, 20, 50, 0.32);
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #273450;
+  font: 700 20px 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #dce4ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #60708a;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  background: #f3f5fa;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.modal label {
+  margin-top: 5px;
+  color: #58657b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.modal input,
+.modal select {
+  width: 100%;
+  border: 1px solid #dce4ef;
+  border-radius: 9px;
+  outline: none;
+  background: #fff;
+  color: #273450;
+  padding: 10px;
+  font-size: 13px;
+  transition: 0.15s ease;
+}
+
+.modal input:focus,
+.modal select:focus {
+  border-color: #7566f6;
+  box-shadow: 0 0 0 3px rgba(117, 102, 246, 0.12);
+}
+
+/* =========================
+   TIME
+========================= */
+
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-row select {
+  flex: 1;
+}
+
+.time-row span {
+  color: #758198;
+  font-weight: 800;
+}
+
+/* =========================
+   MODAL ACTIONS
+========================= */
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.cancel-btn,
+.save-btn {
+  border-radius: 9px;
+  padding: 10px 15px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cancel-btn {
+  border: 1px solid #dbe3ef;
+  background: #fff;
+  color: #5d6980;
+}
+
+.cancel-btn:hover {
+  background: #f4f6fa;
+}
+
+.save-btn {
+  border: 1px solid #6d5dfc;
+  background: #6d5dfc;
+  color: #fff;
+  box-shadow: 0 6px 13px rgba(109, 93, 252, 0.22);
+}
+
+.save-btn:hover {
+  background: #5848e9;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+  .app {
+    padding: 18px 12px 30px;
+  }
+
+  .hero {
+    padding: 22px 18px;
+    border-radius: 16px;
+  }
+
+  .hero h1 {
+    font-size: 25px;
+  }
+
+  .manage-section,
+  .calendar-section {
+    padding: 14px;
+    border-radius: 15px;
+  }
+
+  .post-card {
+    align-items: flex-start;
+  }
+
+  .delete-btn {
+    padding: 6px 8px;
+  }
+
+  .instruction {
+    font-size: 11px;
+  }
+
+  .fc .fc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .fc .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 18px;
+  }
+
+  .fc .fc-button {
+    font-size: 11px;
+    padding: 7px 9px;
+  }
+
+  .modal {
+    padding: 20px;
+  }
+}
+
+/* =========================
+   SMALL MOBILE
+========================= */
+
+@media (max-width: 480px) {
+  .hero {
+    text-align: center;
+  }
+
+  .add-post-btn {
+    width: 100%;
+  }
+
+  .manage-header {
+    align-items: flex-start;
+  }
+
+  .post-card {
+    flex-direction: column;
+  }
+
+  .delete-btn {
+    width: 100%;
+  }
+
+  .time-row {
+    gap: 5px;
+  }
+
+  .fc .fc-button-group {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+  }
+}
