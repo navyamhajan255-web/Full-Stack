@@ -1,0 +1,324 @@
+import { useEffect, useState } from 'react'
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import interactionPlugin from '@fullcalendar/interaction'
+import './App.css'
+
+function App() {
+  const defaultPosts = [
+    {
+      id: '1',
+      title: 'Instagram Post',
+      start: '2026-08-15T10:00:00',
+    },
+    {
+      id: '2',
+      title: 'Product Launch',
+      start: '2026-08-18T14:00:00',
+    },
+    {
+      id: '3',
+      title: 'Weekly Update',
+      start: '2026-08-21T11:30:00',
+    },
+  ]
+
+  const [events, setEvents] = useState(() => {
+    const savedPosts = localStorage.getItem('schedulerPosts')
+
+    if (savedPosts) {
+      return JSON.parse(savedPosts)
+    }
+
+    return defaultPosts
+  })
+
+  const [showForm, setShowForm] = useState(false)
+
+  // NEW: Manage Posts toggle
+  const [showPosts, setShowPosts] = useState(true)
+
+  const [title, setTitle] = useState('')
+  const [date, setDate] = useState('2026-08-20')
+  const [hour, setHour] = useState('10')
+  const [minute, setMinute] = useState('00')
+  const [ampm, setAmpm] = useState('AM')
+
+  // Save posts
+  useEffect(() => {
+    localStorage.setItem('schedulerPosts', JSON.stringify(events))
+  }, [events])
+
+  // Convert AM/PM to 24 hour
+  const convertTo24Hour = () => {
+    let h = Number(hour)
+
+    if (ampm === 'AM' && h === 12) {
+      h = 0
+    }
+
+    if (ampm === 'PM' && h !== 12) {
+      h += 12
+    }
+
+    return `${String(h).padStart(2, '0')}:${minute}:00`
+  }
+
+  // Add post
+  const handleAddPost = (e) => {
+    e.preventDefault()
+
+    if (!title.trim()) {
+      alert('Please enter post title')
+      return
+    }
+
+    const newPost = {
+      id: Date.now().toString(),
+      title: title.trim(),
+      start: `${date}T${convertTo24Hour()}`,
+    }
+
+    setEvents((currentEvents) => [...currentEvents, newPost])
+
+    setTitle('')
+    setDate('2026-08-20')
+    setHour('10')
+    setMinute('00')
+    setAmpm('AM')
+
+    setShowForm(false)
+
+    // Automatically show posts after adding
+    setShowPosts(true)
+  }
+
+  // Drag & drop
+  const handleEventDrop = (info) => {
+    const movedDate = info.event.start
+
+    const year = movedDate.getFullYear()
+    const month = String(movedDate.getMonth() + 1).padStart(2, '0')
+    const day = String(movedDate.getDate()).padStart(2, '0')
+    const hours = String(movedDate.getHours()).padStart(2, '0')
+    const minutes = String(movedDate.getMinutes()).padStart(2, '0')
+
+    const newStart = `${year}-${month}-${day}T${hours}:${minutes}:00`
+
+    setEvents((currentEvents) =>
+      currentEvents.map((event) =>
+        event.id === info.event.id
+          ? {
+              ...event,
+              start: newStart,
+            }
+          : event
+      )
+    )
+  }
+
+  // Delete post
+  const handleDeletePost = (id) => {
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this post?'
+    )
+
+    if (!confirmDelete) return
+
+    setEvents((currentEvents) =>
+      currentEvents.filter((event) => event.id !== id)
+    )
+  }
+
+  return (
+    <div className="app">
+
+      {/* HEADER */}
+      <header className="hero">
+        <h1>Post Scheduler</h1>
+
+        <p>Plan, schedule and manage your posts.</p>
+
+        <button
+          className="add-btn"
+          onClick={() => setShowForm(!showForm)}
+        >
+          {showForm ? '✕ Close' : '+ Add New Post'}
+        </button>
+      </header>
+
+      {/* ADD POST FORM */}
+      {showForm && (
+        <div className="form-card">
+          <h2>Add New Post</h2>
+
+          <form onSubmit={handleAddPost}>
+
+            <label>Post Title</label>
+
+            <input
+              type="text"
+              placeholder="Enter post title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <label>Date</label>
+
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+
+            <label>Time</label>
+
+            <div className="time-row">
+
+              <select
+                value={hour}
+                onChange={(e) => setHour(e.target.value)}
+              >
+                {Array.from({ length: 12 }, (_, i) => {
+                  const value = String(i + 1).padStart(2, '0')
+
+                  return (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  )
+                })}
+              </select>
+
+              <span>:</span>
+
+              <select
+                value={minute}
+                onChange={(e) => setMinute(e.target.value)}
+              >
+                {Array.from({ length: 60 }, (_, i) => {
+                  const value = String(i).padStart(2, '0')
+
+                  return (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  )
+                })}
+              </select>
+
+              <select
+                value={ampm}
+                onChange={(e) => setAmpm(e.target.value)}
+              >
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+
+            </div>
+
+            <button className="save-btn" type="submit">
+              Save Post
+            </button>
+
+          </form>
+        </div>
+      )}
+
+      {/* MANAGE POSTS TOGGLE */}
+      <section className="manage-section">
+
+        <button
+          className="manage-toggle"
+          onClick={() => setShowPosts(!showPosts)}
+        >
+          <span>Manage Posts</span>
+
+          <span className="toggle-arrow">
+            {showPosts ? '▲' : '▼'}
+          </span>
+        </button>
+
+        {/* POSTS */}
+        {showPosts && (
+          <div className="post-list">
+
+            {events.length === 0 ? (
+              <p className="empty">
+                No posts scheduled.
+              </p>
+            ) : (
+              events.map((event) => (
+                <div className="post-item" key={event.id}>
+
+                  <div>
+                    <strong>{event.title}</strong>
+
+                    <small>
+                      {new Date(event.start).toLocaleString()}
+                    </small>
+                  </div>
+
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeletePost(event.id)}
+                  >
+                    Delete
+                  </button>
+
+                </div>
+              ))
+            )}
+
+          </div>
+        )}
+
+      </section>
+
+      {/* CALENDAR */}
+      <section className="calendar-section">
+
+        <p className="drag-info">
+          Drag and drop a post to reschedule it.
+        </p>
+
+        <FullCalendar
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+          ]}
+          initialView="dayGridMonth"
+          initialDate="2026-08-15"
+          editable={true}
+          eventStartEditable={true}
+          eventDurationEditable={false}
+          events={events}
+          eventDrop={handleEventDrop}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+          }}
+          buttonText={{
+            today: 'today',
+            month: 'month',
+            week: 'week',
+            day: 'day',
+          }}
+          eventClick={(info) => {
+            alert(
+              `${info.event.title}\n${info.event.start.toLocaleString()}`
+            )
+          }}
+          height="auto"
+        />
+
+      </section>
+
+    </div>
+  )
+}
+
+export default App
