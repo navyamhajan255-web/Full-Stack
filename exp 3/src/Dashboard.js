@@ -3,14 +3,14 @@ import { useState } from "react";
 function Dashboard({ onLogout }) {
   const username = localStorage.getItem("username") || "User";
 
-  // Role ko safely normalize kar rahe hain
   const savedRole = localStorage.getItem("role") || "Viewer";
+
   const role =
     savedRole.charAt(0).toUpperCase() +
     savedRole.slice(1).toLowerCase();
 
-  // Posts localStorage se load honge
-  const getInitialPosts = () => {
+  // Load posts from localStorage
+  const [posts, setPosts] = useState(() => {
     const savedPosts = localStorage.getItem("posts");
 
     if (savedPosts) {
@@ -29,18 +29,16 @@ function Dashboard({ onLogout }) {
         content: "JWT is used for authentication."
       }
     ];
-  };
+  });
 
-  const [posts, setPosts] = useState(getInitialPosts);
-
-  const [section, setSection] = useState("posts");
+  const [page, setPage] = useState("posts");
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
   const [editingId, setEditingId] = useState(null);
 
-  // Save posts in localStorage
+  // Save posts
   const savePosts = (newPosts) => {
     setPosts(newPosts);
     localStorage.setItem("posts", JSON.stringify(newPosts));
@@ -50,8 +48,8 @@ function Dashboard({ onLogout }) {
   // CREATE POST
   // =========================
 
-  const createPost = () => {
-    if (title.trim() === "" || content.trim() === "") {
+  const handleCreate = () => {
+    if (!title.trim() || !content.trim()) {
       alert("Please enter title and content.");
       return;
     }
@@ -62,23 +60,21 @@ function Dashboard({ onLogout }) {
       content: content
     };
 
-    const newPosts = [...posts, newPost];
-
-    savePosts(newPosts);
+    savePosts([...posts, newPost]);
 
     setTitle("");
     setContent("");
 
-    setSection("posts");
+    setPage("posts");
 
     alert("Post created successfully.");
   };
 
   // =========================
-  // OPEN EDIT
+  // START EDIT
   // =========================
 
-  const editPost = (post) => {
+  const handleEdit = (post) => {
     if (role !== "Admin" && role !== "Editor") {
       alert("You do not have permission to edit posts.");
       return;
@@ -88,30 +84,28 @@ function Dashboard({ onLogout }) {
     setTitle(post.title);
     setContent(post.content);
 
-    setSection("edit");
+    setPage("edit");
   };
 
   // =========================
   // UPDATE POST
   // =========================
 
-  const updatePost = () => {
-    if (title.trim() === "" || content.trim() === "") {
+  const handleUpdate = () => {
+    if (!title.trim() || !content.trim()) {
       alert("Please enter title and content.");
       return;
     }
 
-    const updatedPosts = posts.map((post) => {
-      if (post.id === editingId) {
-        return {
-          ...post,
-          title: title,
-          content: content
-        };
-      }
-
-      return post;
-    });
+    const updatedPosts = posts.map((post) =>
+      post.id === editingId
+        ? {
+            ...post,
+            title: title,
+            content: content
+          }
+        : post
+    );
 
     savePosts(updatedPosts);
 
@@ -119,7 +113,7 @@ function Dashboard({ onLogout }) {
     setTitle("");
     setContent("");
 
-    setSection("posts");
+    setPage("posts");
 
     alert("Post updated successfully.");
   };
@@ -128,7 +122,7 @@ function Dashboard({ onLogout }) {
   // DELETE POST
   // =========================
 
-  const deletePost = (id) => {
+  const handleDelete = (id) => {
     if (role !== "Admin") {
       alert("Only Admin can delete posts.");
       return;
@@ -152,15 +146,14 @@ function Dashboard({ onLogout }) {
   };
 
   // =========================
-  // CREATE FORM
+  // CREATE PAGE
   // =========================
 
-  const openCreateForm = () => {
+  const openCreate = () => {
     setEditingId(null);
     setTitle("");
     setContent("");
-
-    setSection("create");
+    setPage("create");
   };
 
   // =========================
@@ -171,62 +164,61 @@ function Dashboard({ onLogout }) {
     setEditingId(null);
     setTitle("");
     setContent("");
-
-    setSection("posts");
+    setPage("posts");
   };
 
   // =========================
-  // POSTS SECTION
+  // POSTS
   // =========================
 
   const renderPosts = () => {
     return (
-      <div className="posts-section">
-
-        <h3>Posts</h3>
+      <div className="content-section">
+        <h2>Posts</h2>
 
         {posts.length === 0 ? (
-          <div>
+          <div className="empty-posts">
             <p>No posts available.</p>
 
             {(role === "Admin" || role === "Editor") && (
-              <button onClick={openCreateForm}>
-                Create Your First Post
+              <button onClick={openCreate}>
+                Create Post
               </button>
             )}
           </div>
         ) : (
           posts.map((post) => (
             <div className="post-card" key={post.id}>
-
-              <h4>{post.title}</h4>
+              <h3>{post.title}</h3>
 
               <p>{post.content}</p>
 
-              <div className="post-buttons">
+              <div className="post-actions">
 
+                {/* Edit only for Admin and Editor */}
                 {(role === "Admin" || role === "Editor") && (
                   <button
-                    onClick={() => editPost(post)}
+                    className="small-button"
+                    onClick={() => handleEdit(post)}
                   >
                     Edit
                   </button>
                 )}
 
+                {/* Delete only for Admin */}
                 {role === "Admin" && (
                   <button
-                    onClick={() => deletePost(post.id)}
+                    className="small-button delete-button"
+                    onClick={() => handleDelete(post.id)}
                   >
                     Delete
                   </button>
                 )}
 
               </div>
-
             </div>
           ))
         )}
-
       </div>
     );
   };
@@ -236,51 +228,45 @@ function Dashboard({ onLogout }) {
   // =========================
 
   const renderForm = () => {
-    const isEditing = editingId !== null;
+    const editing = editingId !== null;
 
     return (
-      <div className="form-section">
-
-        <h3>
-          {isEditing
-            ? "Edit Post"
-            : "Create Post"}
-        </h3>
+      <div className="content-section">
+        <h2>
+          {editing ? "Edit Post" : "Create Post"}
+        </h2>
 
         <input
+          className="post-input"
           type="text"
-          placeholder="Enter post title"
+          placeholder="Post title"
           value={title}
-          onChange={(e) =>
-            setTitle(e.target.value)
-          }
+          onChange={(e) => setTitle(e.target.value)}
         />
 
         <textarea
-          placeholder="Enter post content"
+          className="post-textarea"
+          placeholder="Write your post..."
           value={content}
-          onChange={(e) =>
-            setContent(e.target.value)
-          }
-          rows="5"
+          onChange={(e) => setContent(e.target.value)}
         />
 
         <button
           onClick={
-            isEditing
-              ? updatePost
-              : createPost
+            editing
+              ? handleUpdate
+              : handleCreate
           }
         >
-          {isEditing
-            ? "Update Post"
-            : "Create Post"}
+          {editing ? "Update Post" : "Create Post"}
         </button>
 
-        <button onClick={cancelForm}>
+        <button
+          className="secondary-button"
+          onClick={cancelForm}
+        >
           Cancel
         </button>
-
       </div>
     );
   };
@@ -291,40 +277,23 @@ function Dashboard({ onLogout }) {
 
   const renderUsers = () => {
     return (
-      <div className="users-section">
-
-        <h3>Manage Users</h3>
+      <div className="content-section">
+        <h2>Manage Users</h2>
 
         <div className="user-card">
-          <p>
-            <strong>Username:</strong> admin
-          </p>
-
-          <p>
-            <strong>Role:</strong> Admin
-          </p>
+          <strong>Admin</strong>
+          <p>Full access to the system.</p>
         </div>
 
         <div className="user-card">
-          <p>
-            <strong>Username:</strong> editor
-          </p>
-
-          <p>
-            <strong>Role:</strong> Editor
-          </p>
+          <strong>Editor</strong>
+          <p>Can create and edit posts.</p>
         </div>
 
         <div className="user-card">
-          <p>
-            <strong>Username:</strong> viewer
-          </p>
-
-          <p>
-            <strong>Role:</strong> Viewer
-          </p>
+          <strong>Viewer</strong>
+          <p>Can view posts.</p>
         </div>
-
       </div>
     );
   };
@@ -335,190 +304,145 @@ function Dashboard({ onLogout }) {
 
   const renderProfile = () => {
     return (
-      <div className="profile-section">
-
-        <h3>User Profile</h3>
+      <div className="content-section">
+        <h2>My Profile</h2>
 
         <p>
-          <strong>Username:</strong>{" "}
-          {username}
+          <strong>Username:</strong> {username}
         </p>
 
         <p>
-          <strong>Role:</strong>{" "}
-          {role}
+          <strong>Role:</strong> {role}
         </p>
 
         <p>
-          <strong>Authentication:</strong>{" "}
-          JWT Token Based
+          <strong>Authentication:</strong> JWT Token Based
         </p>
 
         <p>
           <strong>Session:</strong> Active
         </p>
-
       </div>
     );
   };
 
   return (
-    <div className="container">
+    <div className="dashboard-container">
+      <div className="dashboard-card">
 
-      <div className="card">
-
-        <h1 className="title">
+        <h1 className="dashboard-title">
           JWT Authentication System
         </h1>
 
-        <h2 className="subtitle">
+        <h2 className="welcome">
           Welcome {username}
         </h2>
 
-        <div className="info">
-
+        {/* USER INFORMATION */}
+        <div className="user-info">
           <p>
-            <strong>Username:</strong>{" "}
-            {username}
+            <strong>Username:</strong> {username}
           </p>
 
           <p>
-            <strong>Role:</strong>{" "}
-            {role}
+            <strong>Role:</strong> {role}
           </p>
 
           <p>
-            <strong>Authentication:</strong>{" "}
-            JWT Token Based
+            <strong>Authentication:</strong> JWT Token Based
           </p>
 
           <p>
             <strong>Session:</strong> Active
           </p>
-
         </div>
 
-        <h3 className="role-title">
+        <h2 className="actions-title">
           Available Actions
-        </h3>
+        </h2>
 
-        <div className="actions">
+        {/* =========================
+            ADMIN
+        ========================= */}
 
-          {/* ADMIN ACTIONS */}
+        {role === "Admin" && (
+          <div className="main-actions">
 
-          {role === "Admin" && (
-            <>
-              <button onClick={openCreateForm}>
-                Create Post
-              </button>
+            <button onClick={openCreate}>
+              Create Post
+            </button>
 
-              <button
-                onClick={() =>
-                  setSection("posts")
-                }
-              >
-                Edit Post
-              </button>
+            <button onClick={() => setPage("posts")}>
+              View Posts
+            </button>
 
-              <button
-                onClick={() =>
-                  setSection("posts")
-                }
-              >
-                Delete Post
-              </button>
+            <button onClick={() => setPage("users")}>
+              Manage Users
+            </button>
 
-              <button
-                onClick={() =>
-                  setSection("users")
-                }
-              >
-                Manage Users
-              </button>
+          </div>
+        )}
 
-              <button
-                onClick={() =>
-                  setSection("posts")
-                }
-              >
-                View Posts
-              </button>
-            </>
-          )}
+        {/* =========================
+            EDITOR
+        ========================= */}
 
-          {/* EDITOR ACTIONS */}
+        {role === "Editor" && (
+          <div className="main-actions">
 
-          {role === "Editor" && (
-            <>
-              <button onClick={openCreateForm}>
-                Create Post
-              </button>
+            <button onClick={openCreate}>
+              Create Post
+            </button>
 
-              <button
-                onClick={() =>
-                  setSection("posts")
-                }
-              >
-                Edit Post
-              </button>
+            <button onClick={() => setPage("posts")}>
+              View Posts
+            </button>
 
-              <button
-                onClick={() =>
-                  setSection("posts")
-                }
-              >
-                View Posts
-              </button>
-            </>
-          )}
+          </div>
+        )}
 
-          {/* VIEWER ACTIONS */}
+        {/* =========================
+            VIEWER
+        ========================= */}
 
-          {role === "Viewer" && (
-            <>
-              <button
-                onClick={() =>
-                  setSection("posts")
-                }
-              >
-                View Posts
-              </button>
+        {role === "Viewer" && (
+          <div className="main-actions">
 
-              <button
-                onClick={() =>
-                  setSection("profile")
-                }
-              >
-                View Profile
-              </button>
-            </>
-          )}
+            <button onClick={() => setPage("posts")}>
+              View Posts
+            </button>
 
-        </div>
+            <button onClick={() => setPage("profile")}>
+              View Profile
+            </button>
 
-        {/* CONTENT */}
+          </div>
+        )}
 
-        {section === "posts" &&
-          renderPosts()}
+        {/* =========================
+            CONTENT
+        ========================= */}
 
-        {section === "create" &&
-          renderForm()}
+        {page === "posts" && renderPosts()}
 
-        {section === "edit" &&
-          renderForm()}
+        {page === "create" && renderForm()}
 
-        {section === "users" &&
-          renderUsers()}
+        {page === "edit" && renderForm()}
 
-        {section === "profile" &&
-          renderProfile()}
+        {page === "users" && renderUsers()}
 
-        <button onClick={onLogout}>
+        {page === "profile" && renderProfile()}
+
+        {/* LOGOUT */}
+
+        <button
+          className="logout-button"
+          onClick={onLogout}
+        >
           Logout
         </button>
 
       </div>
-
     </div>
   );
 }

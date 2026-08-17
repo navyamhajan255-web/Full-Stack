@@ -3,130 +3,115 @@ import { useState } from "react";
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState("Admin");
 
-  const handleLogin = () => {
-    if (username === "" || password === "" || role === "") {
-      alert("Please enter username, password and select a role");
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    if (!username || !password) {
+      alert("Please enter username and password.");
       return;
     }
 
-    if (password !== "1234") {
-      alert("Invalid password");
-      return;
-    }
-
-    // JWT Payload
-    const payload = {
-      username: username,
-      role: role
-    };
-
-    // JWT Header
-    const header = {
-      alg: "HS256",
-      typ: "JWT"
-    };
-
-    // Mock JWT Token
-    const token =
-      btoa(JSON.stringify(header)) +
-      "." +
-      btoa(JSON.stringify(payload)) +
-      ".mock-signature";
-
-    // Store authentication information
-    localStorage.setItem("token", token);
+    // Save login information
     localStorage.setItem("username", username);
     localStorage.setItem("role", role);
 
-    alert("Login Successful");
+    // Simple JWT-like token for experiment
+    const token = btoa(
+      JSON.stringify({
+        username: username,
+        role: role
+      })
+    );
+
+    localStorage.setItem("token", token);
 
     onLogin();
   };
 
   return (
-    <div className="container">
-      <div className="card">
+    <div className="login-page">
 
-        <h1 className="title">
-          JWT Authentication System
-        </h1>
+      <div className="login-card">
 
-        <h2 className="subtitle">
-          Secure Login
-        </h2>
+        <h1>JWT Authentication System</h1>
 
-        <input
-          type="text"
-          placeholder="Enter Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+        <h2>Secure Login</h2>
 
-        <input
-          type={showPassword ? "text" : "password"}
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <form onSubmit={handleLogin}>
 
-        <div className="show-password">
           <input
-            type="checkbox"
-            checked={showPassword}
-            onChange={() => setShowPassword(!showPassword)}
+            type="text"
+            placeholder="Enter Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
-          Show Password
-        </div>
 
-        <h3 className="role-heading">
-          Select Role
-        </h3>
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <div className="role-options">
-
-          <label>
+          <label className="password-check">
             <input
-              type="radio"
-              name="role"
-              value="Admin"
-              checked={role === "Admin"}
-              onChange={(e) => setRole(e.target.value)}
+              type="checkbox"
+              checked={showPassword}
+              onChange={(e) =>
+                setShowPassword(e.target.checked)
+              }
             />
-            Admin
+
+            Show Password
           </label>
 
-          <label>
-            <input
-              type="radio"
-              name="role"
-              value="Editor"
-              checked={role === "Editor"}
-              onChange={(e) => setRole(e.target.value)}
-            />
-            Editor
-          </label>
+          <h3>Select Role</h3>
 
-          <label>
-            <input
-              type="radio"
-              name="role"
-              value="Viewer"
-              checked={role === "Viewer"}
-              onChange={(e) => setRole(e.target.value)}
-            />
-            Viewer
-          </label>
+          <div className="roles">
 
-        </div>
+            <label>
+              <input
+                type="radio"
+                value="Admin"
+                checked={role === "Admin"}
+                onChange={(e) => setRole(e.target.value)}
+              />
+              Admin
+            </label>
 
-        <button onClick={handleLogin}>
-          Login
-        </button>
+            <label>
+              <input
+                type="radio"
+                value="Editor"
+                checked={role === "Editor"}
+                onChange={(e) => setRole(e.target.value)}
+              />
+              Editor
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                value="Viewer"
+                checked={role === "Viewer"}
+                onChange={(e) => setRole(e.target.value)}
+              />
+              Viewer
+            </label>
+
+          </div>
+
+          <button type="submit">
+            Login
+          </button>
+
+        </form>
 
       </div>
+
     </div>
   );
 }
