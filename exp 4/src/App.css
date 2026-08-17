@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
-
 :root {
-  font-family: 'DM Sans', sans-serif;
-  color: #1d2942;
-  background: #f4f7fc;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  color: #202a44;
+  background: #f5f7fb;
 }
 
 * {
@@ -13,7 +13,13 @@
 body {
   margin: 0;
   min-width: 320px;
-  background: #f4f7fc;
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      #e7e2ff 0,
+      transparent 27rem
+    ),
+    #f5f7fb;
 }
 
 button,
@@ -27,212 +33,346 @@ button {
 }
 
 /* =========================
-   MAIN APP
+   APP
 ========================= */
 
 .app {
   min-height: 100vh;
-  padding: 30px clamp(16px, 4vw, 64px) 45px;
-  background:
-    radial-gradient(circle at 90% 0%, #dce9ff 0, transparent 26rem),
-    #f4f7fc;
+  padding: 30px clamp(16px, 4vw, 64px) 50px;
 }
 
 /* =========================
-   HEADER
+   HERO
 ========================= */
 
 .hero {
   max-width: 1500px;
-  margin: 0 auto 24px;
-  padding: 26px 30px;
-  border: 1px solid #e3eaf5;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 14px 35px rgba(31, 53, 98, 0.07);
+  margin: 0 auto 20px;
+  padding: 30px 32px;
+  border: 1px solid #e4e9f2;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 15px 40px rgba(37, 52, 88, 0.07);
+}
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+}
+
+.eyebrow,
+.section-kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: #7568e8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
 }
 
 .hero h1 {
   margin: 0;
-  color: #202d49;
-  font: 800 clamp(25px, 3vw, 34px) / 1.2
-    'Plus Jakarta Sans', sans-serif;
+  color: #202b45;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 800;
   letter-spacing: -0.04em;
 }
 
 .hero p {
-  margin: 7px 0 18px;
-  color: #7b879e;
+  margin: 8px 0 0;
+  color: #7d889d;
   font-size: 14px;
 }
 
 .add-post-btn {
+  flex-shrink: 0;
   border: 0;
-  border-radius: 10px;
-  padding: 11px 17px;
-  background: linear-gradient(135deg, #6d5dfc, #8b6ff8);
-  color: white;
+  border-radius: 11px;
+  padding: 12px 18px;
+  background: linear-gradient(
+    135deg,
+    #6c5ce7,
+    #8878f5
+  );
+  color: #fff;
   font-size: 13px;
   font-weight: 800;
-  box-shadow: 0 8px 18px rgba(109, 93, 252, 0.25);
+  box-shadow: 0 9px 20px rgba(108, 92, 231, 0.25);
   transition: 0.2s ease;
 }
 
 .add-post-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 11px 22px rgba(109, 93, 252, 0.32);
+  box-shadow: 0 13px 25px rgba(108, 92, 231, 0.3);
+}
+
+/* =========================
+   STATS
+========================= */
+
+.stats-grid {
+  max-width: 1500px;
+  margin: 0 auto 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 115px;
+  padding: 20px;
+  border: 1px solid #e4e9f2;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(37, 52, 88, 0.055);
+  transition: 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(37, 52, 88, 0.09);
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 13px;
+  background: #f0eeff;
+  font-size: 21px;
+}
+
+.stat-label {
+  display: block;
+  margin-bottom: 2px;
+  color: #78849a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.stat-card strong {
+  display: block;
+  color: #293650;
+  font-size: 27px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.stat-card small {
+  display: block;
+  margin-top: 3px;
+  color: #a0a9b8;
+  font-size: 10px;
+}
+
+.scheduled-card .stat-icon {
+  background: #eeeaff;
+}
+
+.draft-card .stat-icon {
+  background: #fff5df;
+}
+
+.published-card .stat-icon {
+  background: #e9f9ef;
+}
+
+.total-card .stat-icon {
+  background: #eaf2ff;
 }
 
 /* =========================
    MANAGE POSTS
 ========================= */
 
-.manage-section {
+.manage-section,
+.calendar-section {
   max-width: 1500px;
   margin: 0 auto 20px;
-  padding: 20px;
-  border: 1px solid #e3eaf5;
-  border-radius: 18px;
+  padding: 22px;
+  border: 1px solid #e4e9f2;
+  border-radius: 20px;
   background: #fff;
-  box-shadow: 0 12px 30px rgba(31, 53, 98, 0.06);
+  box-shadow: 0 12px 32px rgba(37, 52, 88, 0.06);
 }
 
-.manage-header {
+.manage-header,
+.calendar-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
 }
 
-.manage-header h2 {
+.manage-header h2,
+.calendar-heading h2 {
   margin: 0;
   color: #293650;
-  font: 700 17px 'Plus Jakarta Sans', sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
 }
 
-.toggle-container {
+.manage-toggle {
   display: flex;
   align-items: center;
   gap: 9px;
-}
-
-.toggle-container > span {
-  color: #68758d;
+  border: 1px solid #dce3ee;
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: #fff;
+  color: #5f6c84;
   font-size: 11px;
   font-weight: 800;
 }
 
-/* =========================
-   TOGGLE
-========================= */
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
+.manage-toggle:hover {
+  border-color: #8a7cf2;
+  background: #f5f3ff;
+  color: #6254df;
 }
-
-.switch input {
-  width: 0;
-  height: 0;
-  opacity: 0;
-}
-
-.slider {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  background: #cbd3df;
-  transition: 0.25s ease;
-}
-
-.slider::before {
-  content: '';
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  left: 3px;
-  top: 3px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: 0.25s ease;
-}
-
-.switch input:checked + .slider {
-  background: #6d5dfc;
-}
-
-.switch input:checked + .slider::before {
-  transform: translateX(20px);
-}
-
-/* =========================
-   POSTS LIST
-========================= */
 
 .posts-list {
   display: grid;
-  gap: 8px;
-  margin-top: 17px;
+  gap: 9px;
+  margin-top: 18px;
 }
 
 .post-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
-  padding: 12px 14px;
-  border: 1px solid #edf0f6;
-  border-radius: 11px;
-  background: #f8faff;
+  gap: 18px;
+  padding: 14px 15px;
+  border: 1px solid #e9edf4;
+  border-radius: 12px;
+  background: #fafbfe;
   transition: 0.18s ease;
 }
 
 .post-card:hover {
   border-color: #dcd7ff;
-  background: #f5f3ff;
-  transform: translateY(-1px);
+  background: #f8f7ff;
+}
+
+.post-info {
+  min-width: 0;
+}
+
+.post-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .post-info h3 {
   margin: 0;
-  color: #35425c;
+  color: #35425d;
   font-size: 13px;
   font-weight: 800;
 }
 
 .post-info p {
-  margin: 4px 0 0;
-  color: #8490a5;
+  margin: 5px 0 0;
+  color: #8a95a8;
   font-size: 11px;
 }
 
-.delete-btn {
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.status-badge.scheduled {
+  background: #eeeaff;
+  color: #6354dc;
+}
+
+.status-badge.draft {
+  background: #fff3d9;
+  color: #a86e00;
+}
+
+.status-badge.published {
+  background: #e5f8ec;
+  color: #26834a;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
-  border: 1px solid #ffd9df;
+}
+
+.status-select {
+  border: 1px solid #dce3ee;
+  border-radius: 8px;
+  padding: 7px 9px;
+  outline: none;
+  background: #fff;
+  color: #56637b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.status-select:focus {
+  border-color: #7668eb;
+}
+
+.delete-btn {
+  border: 1px solid #ffd8df;
   border-radius: 8px;
   padding: 7px 10px;
   background: #fff1f3;
-  color: #c03650;
-  font-size: 11px;
+  color: #c13952;
+  font-size: 10px;
   font-weight: 800;
   transition: 0.18s ease;
 }
 
 .delete-btn:hover {
-  background: #ffe4e9;
-  transform: translateY(-1px);
+  background: #ffe5e9;
 }
 
 .empty-posts {
-  padding: 20px;
-  border-radius: 10px;
-  background: #f8faff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 150px;
+  border-radius: 12px;
+  background: #fafbfe;
   color: #8994a8;
   text-align: center;
+}
+
+.empty-icon {
+  margin-bottom: 5px;
+  font-size: 27px;
+}
+
+.empty-posts strong {
+  color: #59657b;
   font-size: 13px;
+}
+
+.empty-posts span {
+  font-size: 11px;
 }
 
 /* =========================
@@ -242,28 +382,64 @@ button {
 .instruction {
   max-width: 1500px;
   margin: 0 auto 12px;
-  padding: 10px 14px;
+  padding: 11px 15px;
+  border: 1px solid #ded9ff;
   border-radius: 10px;
-  background: #eeeaff;
-  color: #6658d9;
-  font-size: 12px;
+  background: #f1efff;
+  color: #6558d6;
+  font-size: 11px;
   font-weight: 700;
 }
 
+.instruction span {
+  margin-right: 7px;
+  font-size: 14px;
+}
+
 /* =========================
-   CALENDAR
+   CALENDAR HEADING
 ========================= */
 
-.calendar-section {
-  max-width: 1500px;
-  margin: 0 auto;
-  padding: 20px;
-  overflow: hidden;
-  border: 1px solid #e3eaf5;
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 14px 35px rgba(31, 53, 98, 0.07);
+.calendar-heading {
+  margin-bottom: 20px;
 }
+
+.calendar-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.calendar-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #7c879b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.scheduled {
+  background: #7567ea;
+}
+
+.legend-dot.draft {
+  background: #e8a928;
+}
+
+.legend-dot.published {
+  background: #3aae69;
+}
+
+/* =========================
+   FULL CALENDAR
+========================= */
 
 .fc {
   color: #293650;
@@ -276,61 +452,56 @@ button {
 
 .fc .fc-toolbar-title {
   color: #293650;
-  font: 700 20px 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
   letter-spacing: -0.03em;
 }
 
 .fc .fc-button {
-  border: 1px solid #dde5f1;
+  border: 1px solid #dce4ef;
   border-radius: 8px;
   background: #fff;
-  color: #53617c;
+  color: #56637b;
   box-shadow: none;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  transition: 0.18s ease;
 }
 
 .fc .fc-button:hover,
 .fc .fc-button:focus {
-  border-color: #796bfa;
-  background: #f0eeff;
-  color: #5d4ee8;
+  border-color: #7769eb;
+  background: #f1efff;
+  color: #5f51d9;
   box-shadow: none;
 }
 
 .fc .fc-button-primary:not(:disabled).fc-button-active {
-  border-color: #796bfa;
-  background: #f0eeff;
-  color: #5d4ee8;
-}
-
-.fc .fc-today-button {
-  font-weight: 800;
+  border-color: #7769eb;
+  background: #f1efff;
+  color: #5f51d9;
 }
 
 .fc .fc-col-header-cell {
   padding: 10px 4px;
-  border-color: #e9eef6;
+  border-color: #e8edf5;
 }
 
 .fc .fc-col-header-cell-cushion {
-  color: #7a86a0;
+  color: #7d889e;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
   text-decoration: none;
+  text-transform: uppercase;
 }
 
 .fc .fc-daygrid-day {
-  border-color: #e9eef6;
+  border-color: #e8edf5;
 }
 
 .fc .fc-daygrid-day-number {
   padding: 7px 9px;
-  color: #66738d;
-  font-size: 12px;
+  color: #66738c;
+  font-size: 11px;
   font-weight: 700;
   text-decoration: none;
 }
@@ -340,27 +511,66 @@ button {
 }
 
 .fc .fc-day-today .fc-daygrid-day-number {
-  color: #6556ec;
+  color: #6355dc;
 }
 
 .fc .fc-day-other {
   background: #fafbfe;
 }
 
-.fc-event {
+/* Calendar scheduled */
+
+.fc-event.status-scheduled {
   border: 0 !important;
-  border-left: 3px solid rgba(255, 255, 255, 0.7) !important;
+  border-left: 3px solid #ffffffb8 !important;
   border-radius: 6px;
   padding: 3px 6px;
-  background: linear-gradient(135deg, #6d5dfc, #8876f8);
-  box-shadow: 0 3px 8px rgba(44, 56, 104, 0.18);
-  font-size: 11px;
+  background: linear-gradient(
+    135deg,
+    #6c5ce7,
+    #8878f5
+  );
+  box-shadow: 0 3px 8px rgba(44, 56, 104, 0.16);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Calendar draft */
+
+.fc-event.status-draft {
+  border: 0 !important;
+  border-left: 3px solid #ffffffb8 !important;
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: linear-gradient(
+    135deg,
+    #e5a42b,
+    #f0bb51
+  );
+  box-shadow: 0 3px 8px rgba(100, 80, 30, 0.14);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Calendar published */
+
+.fc-event.status-published {
+  border: 0 !important;
+  border-left: 3px solid #ffffffb8 !important;
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: linear-gradient(
+    135deg,
+    #32a964,
+    #55bd7c
+  );
+  box-shadow: 0 3px 8px rgba(30, 100, 60, 0.14);
+  font-size: 10px;
   font-weight: 700;
 }
 
 .fc-event:hover {
-  filter: brightness(1.07);
-  box-shadow: 0 6px 14px rgba(44, 56, 104, 0.25);
+  filter: brightness(1.06);
 }
 
 .fc-event-title {
@@ -375,10 +585,6 @@ button {
 .fc-timegrid-slot-label {
   color: #9aa4b6;
   font-size: 10px;
-}
-
-.fc-timegrid-axis {
-  border-color: #e9eef6;
 }
 
 .fc-scrollgrid {
@@ -399,7 +605,7 @@ button {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(18, 28, 55, 0.48);
+  background: rgba(18, 28, 55, 0.5);
   backdrop-filter: blur(5px);
 }
 
@@ -410,7 +616,7 @@ button {
   border: 1px solid #e0e7f2;
   border-radius: 18px;
   background: #fff;
-  box-shadow: 0 24px 60px rgba(9, 20, 50, 0.32);
+  box-shadow: 0 25px 65px rgba(9, 20, 50, 0.3);
   animation: modalIn 0.2s ease;
 }
 
@@ -437,7 +643,8 @@ button {
 .modal-header h2 {
   margin: 0;
   color: #273450;
-  font: 700 20px 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
   letter-spacing: -0.03em;
 }
 
@@ -488,10 +695,6 @@ button {
   box-shadow: 0 0 0 3px rgba(117, 102, 246, 0.12);
 }
 
-/* =========================
-   TIME
-========================= */
-
 .time-row {
   display: flex;
   align-items: center;
@@ -507,15 +710,15 @@ button {
   font-weight: 800;
 }
 
-/* =========================
-   MODAL ACTIONS
-========================= */
+.modal-status {
+  margin-bottom: 5px;
+}
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 15px;
 }
 
 .cancel-btn,
@@ -551,6 +754,21 @@ button {
    RESPONSIVE
 ========================= */
 
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .add-post-btn {
+    width: auto;
+  }
+}
+
 @media (max-width: 700px) {
   .app {
     padding: 18px 12px 30px;
@@ -562,7 +780,7 @@ button {
   }
 
   .hero h1 {
-    font-size: 25px;
+    font-size: 26px;
   }
 
   .manage-section,
@@ -573,14 +791,25 @@ button {
 
   .post-card {
     align-items: flex-start;
+    flex-direction: column;
   }
 
+  .post-actions {
+    width: 100%;
+  }
+
+  .status-select,
   .delete-btn {
-    padding: 6px 8px;
+    flex: 1;
   }
 
-  .instruction {
-    font-size: 11px;
+  .calendar-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .calendar-legend {
+    flex-wrap: wrap;
   }
 
   .fc .fc-toolbar {
@@ -599,7 +828,7 @@ button {
   }
 
   .fc .fc-button {
-    font-size: 11px;
+    font-size: 10px;
     padding: 7px 9px;
   }
 
@@ -608,13 +837,17 @@ button {
   }
 }
 
-/* =========================
-   SMALL MOBILE
-========================= */
-
 @media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
   .hero {
     text-align: center;
+  }
+
+  .hero-content {
+    align-items: center;
   }
 
   .add-post-btn {
@@ -625,10 +858,15 @@ button {
     align-items: flex-start;
   }
 
-  .post-card {
+  .manage-toggle {
+    padding: 7px 9px;
+  }
+
+  .post-actions {
     flex-direction: column;
   }
 
+  .status-select,
   .delete-btn {
     width: 100%;
   }
@@ -639,15 +877,5 @@ button {
 
   .fc .fc-button-group {
     display: flex;
-    flex-wrap: wrap;
-  }
-
-  .modal-actions {
-    flex-direction: column-reverse;
-  }
-
-  .cancel-btn,
-  .save-btn {
-    width: 100%;
   }
 }

@@ -10,16 +10,19 @@ const defaultPosts = [
     id: '1',
     title: 'Instagram Post',
     start: '2026-08-15T10:00:00',
+    status: 'scheduled',
   },
   {
     id: '2',
     title: 'Product Launch',
     start: '2026-08-18T14:00:00',
+    status: 'scheduled',
   },
   {
     id: '3',
     title: 'Weekly Update',
     start: '2026-08-21T11:30:00',
+    status: 'scheduled',
   },
 ]
 
@@ -28,7 +31,17 @@ function App() {
     const saved = localStorage.getItem('schedulerPosts')
 
     if (saved) {
-      return JSON.parse(saved)
+      try {
+        const parsed = JSON.parse(saved)
+
+        // Old posts ke liye default status
+        return parsed.map((post) => ({
+          ...post,
+          status: post.status || 'scheduled',
+        }))
+      } catch {
+        return defaultPosts
+      }
     }
 
     return defaultPosts
@@ -42,11 +55,14 @@ function App() {
   const [hour, setHour] = useState('10')
   const [minute, setMinute] = useState('00')
   const [ampm, setAmpm] = useState('AM')
+  const [status, setStatus] = useState('scheduled')
 
+  // Save posts
   useEffect(() => {
     localStorage.setItem('schedulerPosts', JSON.stringify(events))
   }, [events])
 
+  // Convert 12-hour time to 24-hour time
   const convertTo24Hour = (hourValue, ampmValue) => {
     let h = Number(hourValue)
 
@@ -61,6 +77,22 @@ function App() {
     return String(h).padStart(2, '0')
   }
 
+  // Dashboard counts
+  const scheduledCount = events.filter(
+    (post) => post.status === 'scheduled'
+  ).length
+
+  const draftCount = events.filter(
+    (post) => post.status === 'draft'
+  ).length
+
+  const publishedCount = events.filter(
+    (post) => post.status === 'published'
+  ).length
+
+  const totalCount = events.length
+
+  // Add new post
   const handleAddPost = (e) => {
     e.preventDefault()
 
@@ -75,19 +107,23 @@ function App() {
       id: Date.now().toString(),
       title: title.trim(),
       start: `${date}T${convertedHour}:${minute}:00`,
+      status,
     }
 
     setEvents((current) => [...current, newPost])
 
+    // Reset form
     setTitle('')
     setDate('2026-08-25')
     setHour('10')
     setMinute('00')
     setAmpm('AM')
+    setStatus('scheduled')
     setShowModal(false)
     setShowManagePosts(true)
   }
 
+  // Delete post
   const handleDelete = (id) => {
     const confirmDelete = window.confirm(
       'Are you sure you want to delete this post?'
@@ -100,6 +136,21 @@ function App() {
     )
   }
 
+  // Change status
+  const handleStatusChange = (id, newStatus) => {
+    setEvents((current) =>
+      current.map((event) =>
+        event.id === id
+          ? {
+              ...event,
+              status: newStatus,
+            }
+          : event
+      )
+    )
+  }
+
+  // Drag and drop
   const handleEventDrop = (info) => {
     const newStart = info.event.start
 
@@ -126,12 +177,13 @@ function App() {
     )
   }
 
+  // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString)
 
     return date.toLocaleString('en-IN', {
       day: 'numeric',
-      month: 'numeric',
+      month: 'short',
       year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
@@ -139,46 +191,105 @@ function App() {
     })
   }
 
+  // Calendar events with status classes
+  const calendarEvents = events.map((event) => ({
+    ...event,
+    classNames: [`status-${event.status || 'scheduled'}`],
+  }))
+
   return (
     <div className="app">
 
       {/* HEADER */}
       <header className="hero">
-        <h1>Post Scheduler</h1>
+        <div className="hero-content">
+          <div>
+            <span className="eyebrow">CONTENT MANAGEMENT</span>
 
-        <p>Plan, schedule and manage your posts.</p>
+            <h1>Post Scheduler</h1>
 
-        <button
-          className="add-post-btn"
-          onClick={() => setShowModal(true)}
-        >
-          + Add New Post
-        </button>
+            <p>
+              Plan, schedule and manage your posts in one place.
+            </p>
+          </div>
+
+          <button
+            className="add-post-btn"
+            onClick={() => setShowModal(true)}
+          >
+            + Add New Post
+          </button>
+        </div>
       </header>
+
+      {/* DASHBOARD STATS */}
+      <section className="stats-grid">
+
+        <div className="stat-card scheduled-card">
+          <div className="stat-icon">📅</div>
+
+          <div>
+            <span className="stat-label">Scheduled Posts</span>
+            <strong>{scheduledCount}</strong>
+            <small>Ready to publish</small>
+          </div>
+        </div>
+
+        <div className="stat-card draft-card">
+          <div className="stat-icon">📝</div>
+
+          <div>
+            <span className="stat-label">Drafts</span>
+            <strong>{draftCount}</strong>
+            <small>Still in progress</small>
+          </div>
+        </div>
+
+        <div className="stat-card published-card">
+          <div className="stat-icon">✓</div>
+
+          <div>
+            <span className="stat-label">Published</span>
+            <strong>{publishedCount}</strong>
+            <small>Successfully published</small>
+          </div>
+        </div>
+
+        <div className="stat-card total-card">
+          <div className="stat-icon">📊</div>
+
+          <div>
+            <span className="stat-label">Total Posts</span>
+            <strong>{totalCount}</strong>
+            <small>All your posts</small>
+          </div>
+        </div>
+
+      </section>
 
       {/* MANAGE POSTS */}
       <section className="manage-section">
 
         <div className="manage-header">
-          <h2>Manage Posts</h2>
 
-          <div className="toggle-container">
-            <span>
-              {showManagePosts ? 'ON' : 'OFF'}
-            </span>
-
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={showManagePosts}
-                onChange={(e) =>
-                  setShowManagePosts(e.target.checked)
-                }
-              />
-
-              <span className="slider"></span>
-            </label>
+          <div>
+            <span className="section-kicker">CONTENT</span>
+            <h2>Manage Posts</h2>
           </div>
+
+          <button
+            className="manage-toggle"
+            onClick={() =>
+              setShowManagePosts(!showManagePosts)
+            }
+          >
+            {showManagePosts ? 'Hide Posts' : 'Show Posts'}
+
+            <span>
+              {showManagePosts ? '▲' : '▼'}
+            </span>
+          </button>
+
         </div>
 
         {showManagePosts && (
@@ -186,26 +297,76 @@ function App() {
 
             {events.length === 0 ? (
               <div className="empty-posts">
-                No posts scheduled yet.
+                <div className="empty-icon">📝</div>
+
+                <strong>No posts scheduled yet</strong>
+
+                <span>
+                  Click "Add New Post" to create your first post.
+                </span>
               </div>
             ) : (
               events.map((post) => (
                 <div className="post-card" key={post.id}>
 
                   <div className="post-info">
-                    <h3>{post.title}</h3>
+
+                    <div className="post-title-row">
+                      <h3>{post.title}</h3>
+
+                      <span
+                        className={`status-badge ${post.status}`}
+                      >
+                        {post.status === 'scheduled' && 'Scheduled'}
+
+                        {post.status === 'draft' && 'Draft'}
+
+                        {post.status === 'published' &&
+                          'Published'}
+                      </span>
+                    </div>
 
                     <p>
-                      {formatDate(post.start)}
+                      🕐 {formatDate(post.start)}
                     </p>
+
                   </div>
 
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDelete(post.id)}
-                  >
-                    Delete
-                  </button>
+                  <div className="post-actions">
+
+                    <select
+                      className="status-select"
+                      value={post.status || 'scheduled'}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          post.id,
+                          e.target.value
+                        )
+                      }
+                    >
+                      <option value="scheduled">
+                        Scheduled
+                      </option>
+
+                      <option value="draft">
+                        Draft
+                      </option>
+
+                      <option value="published">
+                        Published
+                      </option>
+                    </select>
+
+                    <button
+                      className="delete-btn"
+                      onClick={() =>
+                        handleDelete(post.id)
+                      }
+                    >
+                      Delete
+                    </button>
+
+                  </div>
 
                 </div>
               ))
@@ -213,15 +374,43 @@ function App() {
 
           </div>
         )}
+
       </section>
 
       {/* INSTRUCTION */}
       <div className="instruction">
-        Drag and drop a post to another date or time to reschedule it.
+        <span>↔</span>
+        Drag and drop a post on the calendar to reschedule it.
       </div>
 
       {/* CALENDAR */}
       <section className="calendar-section">
+
+        <div className="calendar-heading">
+          <div>
+            <span className="section-kicker">SCHEDULE</span>
+            <h2>Content Calendar</h2>
+          </div>
+
+          <div className="calendar-legend">
+
+            <span>
+              <i className="legend-dot scheduled"></i>
+              Scheduled
+            </span>
+
+            <span>
+              <i className="legend-dot draft"></i>
+              Draft
+            </span>
+
+            <span>
+              <i className="legend-dot published"></i>
+              Published
+            </span>
+
+          </div>
+        </div>
 
         <FullCalendar
           plugins={[
@@ -234,26 +423,29 @@ function App() {
           editable={true}
           eventStartEditable={true}
           eventDurationEditable={false}
-          events={events}
+          events={calendarEvents}
           eventDrop={handleEventDrop}
           height="auto"
-
           headerToolbar={{
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+            right:
+              'dayGridMonth,timeGridWeek,timeGridDay',
           }}
-
           buttonText={{
-            today: 'today',
-            month: 'month',
-            week: 'week',
-            day: 'day',
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day',
           }}
-
           eventClick={(info) => {
+            const eventStatus =
+              info.event.extendedProps.status
+
             alert(
-              `Selected post: ${info.event.title}\n${info.event.start.toLocaleString()}`
+              `Post: ${info.event.title}\nStatus: ${
+                eventStatus || 'Scheduled'
+              }\nDate: ${info.event.start.toLocaleString()}`
             )
           }}
         />
@@ -274,7 +466,13 @@ function App() {
 
             <div className="modal-header">
 
-              <h2>Add New Post</h2>
+              <div>
+                <span className="section-kicker">
+                  NEW CONTENT
+                </span>
+
+                <h2>Add New Post</h2>
+              </div>
 
               <button
                 className="close-btn"
@@ -293,7 +491,9 @@ function App() {
                 type="text"
                 placeholder="e.g. Instagram Post"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) =>
+                  setTitle(e.target.value)
+                }
               />
 
               <label>Date</label>
@@ -301,7 +501,9 @@ function App() {
               <input
                 type="date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) =>
+                  setDate(e.target.value)
+                }
               />
 
               <label>Time</label>
@@ -310,13 +512,16 @@ function App() {
 
                 <select
                   value={hour}
-                  onChange={(e) => setHour(e.target.value)}
+                  onChange={(e) =>
+                    setHour(e.target.value)
+                  }
                 >
                   {Array.from(
                     { length: 12 },
                     (_, index) => {
-                      const value = String(index + 1)
-                        .padStart(2, '0')
+                      const value = String(
+                        index + 1
+                      ).padStart(2, '0')
 
                       return (
                         <option
@@ -341,8 +546,9 @@ function App() {
                   {Array.from(
                     { length: 60 },
                     (_, index) => {
-                      const value = String(index)
-                        .padStart(2, '0')
+                      const value = String(
+                        index
+                      ).padStart(2, '0')
 
                       return (
                         <option
@@ -368,12 +574,36 @@ function App() {
 
               </div>
 
+              <label>Status</label>
+
+              <select
+                className="modal-status"
+                value={status}
+                onChange={(e) =>
+                  setStatus(e.target.value)
+                }
+              >
+                <option value="scheduled">
+                  Scheduled
+                </option>
+
+                <option value="draft">
+                  Draft
+                </option>
+
+                <option value="published">
+                  Published
+                </option>
+              </select>
+
               <div className="modal-actions">
 
                 <button
                   type="button"
                   className="cancel-btn"
-                  onClick={() => setShowModal(false)}
+                  onClick={() =>
+                    setShowModal(false)
+                  }
                 >
                   Cancel
                 </button>
