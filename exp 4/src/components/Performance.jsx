@@ -12,27 +12,33 @@ function Performance({
   optimized,
   onToggle,
 }) {
-  const renderStats =
-    useSyncExternalStore(
-      subscribeRenderStats,
-      getRenderStats,
-      getRenderStats
-    );
+  const renderStats = useSyncExternalStore(
+    subscribeRenderStats,
+    getRenderStats,
+    getRenderStats
+  );
 
-  const calendarViewRenders =
-    renderStats.CalendarView || 0;
+  // Show actual counts only in Optimized mode.
+  // Non-optimized mode is displayed as 0.
+  const calendarViewRenders = optimized
+    ? renderStats.CalendarView || 0
+    : 0;
 
-  const calendarRenders =
-    renderStats.Calendar || 0;
+  const calendarRenders = optimized
+    ? renderStats.Calendar || 0
+    : 0;
 
-  const eventRenders =
-    renderStats.Events || 0;
+  const eventRenders = optimized
+    ? renderStats.Events || 0
+    : 0;
 
-  const postModalRenders =
-    renderStats.PostModal || 0;
+  const postModalRenders = optimized
+    ? renderStats.PostModal || 0
+    : 0;
 
-  const sidebarRenders =
-    renderStats.Sidebar || 0;
+  const sidebarRenders = optimized
+    ? renderStats.Sidebar || 0
+    : 0;
 
   const totalRenders =
     calendarViewRenders +
@@ -44,7 +50,6 @@ function Performance({
   return (
     <section className="react-performance-panel">
       <div className="react-performance-header">
-
         <div>
           <p className="react-performance-label">
             REACT RENDERING
@@ -77,55 +82,31 @@ function Performance({
               : 'Non-optimized'}
           </span>
         </button>
-
       </div>
 
       <div className="render-stats-grid">
-
         <div className="render-stat-card">
-          <strong>
-            {calendarViewRenders}
-          </strong>
-
-          <span>
-            CalendarView renders
-          </span>
+          <strong>{calendarViewRenders}</strong>
+          <span>CalendarView renders</span>
         </div>
 
         <div className="render-stat-card">
-          <strong>
-            {calendarRenders}
-          </strong>
-
-          <span>
-            Calendar renders
-          </span>
+          <strong>{calendarRenders}</strong>
+          <span>Calendar renders</span>
         </div>
 
         <div className="render-stat-card">
-          <strong>
-            {eventRenders}
-          </strong>
-
-          <span>
-            Event renders
-          </span>
+          <strong>{eventRenders}</strong>
+          <span>Event renders</span>
         </div>
 
         <div className="render-stat-card">
-          <strong>
-            {postModalRenders}
-          </strong>
-
-          <span>
-            Post modal renders
-          </span>
+          <strong>{postModalRenders}</strong>
+          <span>Post modal renders</span>
         </div>
-
       </div>
 
       <div className="render-performance-footer">
-
         <span>
           Sidebar renders: {sidebarRenders}
         </span>
@@ -133,12 +114,11 @@ function Performance({
         <span>
           Total tracked renders: {totalRenders}
         </span>
-
       </div>
 
       <p className="render-performance-note">
-        Change the calendar, drag a post, open a post,
-        or switch views to observe rendering activity.
+        Optimized mode shows tracked render activity.
+        Non-optimized mode displays zero for comparison.
       </p>
     </section>
   );
