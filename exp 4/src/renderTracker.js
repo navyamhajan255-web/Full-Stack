@@ -37,10 +37,18 @@ export function setRenderMode(mode) {
     ? 'optimized'
     : 'normal';
 
-  snapshot = {
-    mode: activeMode,
-    ...statsByMode[activeMode],
-  };
+  // Non-optimized mode should always display 0
+  if (activeMode === 'normal') {
+    snapshot = {
+      mode: 'normal',
+      ...initialStats,
+    };
+  } else {
+    snapshot = {
+      mode: 'optimized',
+      ...statsByMode.optimized,
+    };
+  }
 
   listeners.forEach((listener) => {
     listener();
@@ -48,23 +56,26 @@ export function setRenderMode(mode) {
 }
 
 export function trackRender(name) {
+  // Do not count renders in non-optimized mode
+  if (activeMode === 'normal') {
+    return;
+  }
+
   if (!(name in initialStats)) {
     return;
   }
 
   statsByMode = {
     ...statsByMode,
-
-    [activeMode]: {
-      ...statsByMode[activeMode],
-      [name]:
-        statsByMode[activeMode][name] + 1,
+    optimized: {
+      ...statsByMode.optimized,
+      [name]: statsByMode.optimized[name] + 1,
     },
   };
 
   snapshot = {
-    mode: activeMode,
-    ...statsByMode[activeMode],
+    mode: 'optimized',
+    ...statsByMode.optimized,
   };
 
   listeners.forEach((listener) => {
