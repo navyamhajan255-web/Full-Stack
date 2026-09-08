@@ -1168,4 +1168,25 @@ button {
   .performance-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}.render-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.render-reset-button {
+  border: 1px solid #d9ddea;
+  background: #ffffff;
+  color: #23345d;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.render-reset-button:hover {
+  transform: translateY(-1px);
+  border-color: #8b72ff;
 }

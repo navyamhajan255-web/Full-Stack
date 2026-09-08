@@ -5,6 +5,7 @@ import {
 
 import {
   getRenderStats,
+  resetRenderStats,
   subscribeRenderStats,
 } from '../renderTracker';
 
@@ -40,6 +41,10 @@ function Performance({
     postModalRenders +
     sidebarRenders;
 
+  const handleReset = () => {
+    resetRenderStats();
+  };
+
   return (
     <section className="react-performance-panel">
       <div className="react-performance-header">
@@ -55,26 +60,36 @@ function Performance({
           </h2>
         </div>
 
-        <button
-          type="button"
-          className={`render-mode-toggle ${
-            optimized
-              ? 'is-optimized'
-              : 'is-normal'
-          }`}
-          onClick={onToggle}
-          aria-pressed={optimized}
-        >
-          <span className="toggle-track">
-            <span className="toggle-thumb" />
-          </span>
+        <div className="render-controls">
+          <button
+            type="button"
+            className={`render-mode-toggle ${
+              optimized
+                ? 'is-optimized'
+                : 'is-normal'
+            }`}
+            onClick={onToggle}
+            aria-pressed={optimized}
+          >
+            <span className="toggle-track">
+              <span className="toggle-thumb" />
+            </span>
 
-          <span>
-            {optimized
-              ? 'Optimized'
-              : 'Non-optimized'}
-          </span>
-        </button>
+            <span>
+              {optimized
+                ? 'Optimized'
+                : 'Non-optimized'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="render-reset-button"
+            onClick={handleReset}
+          >
+            Reset
+          </button>
+        </div>
       </div>
 
       <div className="render-stats-grid">
@@ -110,8 +125,8 @@ function Performance({
       </div>
 
       <p className="render-performance-note">
-        Switch between optimized and non-optimized
-        modes to compare React rendering activity.
+        Change the calendar, drag a post, open a post,
+        or switch views to observe rendering activity.
       </p>
     </section>
   );

@@ -32,53 +32,58 @@ export function getRenderStats() {
   return snapshot;
 }
 
-export function setRenderMode(mode) {
-  activeMode = mode === 'optimized'
-    ? 'optimized'
-    : 'normal';
-
-  // Non-optimized mode should always display 0
-  if (activeMode === 'normal') {
-    snapshot = {
-      mode: 'normal',
-      ...initialStats,
-    };
-  } else {
-    snapshot = {
-      mode: 'optimized',
-      ...statsByMode.optimized,
-    };
-  }
-
+function notify() {
   listeners.forEach((listener) => {
     listener();
   });
 }
 
-export function trackRender(name) {
-  // Do not count renders in non-optimized mode
-  if (activeMode === 'normal') {
-    return;
-  }
+export function setRenderMode(mode) {
+  activeMode =
+    mode === 'optimized'
+      ? 'optimized'
+      : 'normal';
 
+  snapshot = {
+    mode: activeMode,
+    ...statsByMode[activeMode],
+  };
+
+  notify();
+}
+
+export function resetRenderStats() {
+  statsByMode = {
+    ...statsByMode,
+    [activeMode]: { ...initialStats },
+  };
+
+  snapshot = {
+    mode: activeMode,
+    ...statsByMode[activeMode],
+  };
+
+  notify();
+}
+
+export function trackRender(name) {
   if (!(name in initialStats)) {
     return;
   }
 
   statsByMode = {
     ...statsByMode,
-    optimized: {
-      ...statsByMode.optimized,
-      [name]: statsByMode.optimized[name] + 1,
+    [activeMode]: {
+      ...statsByMode[activeMode],
+      [name]:
+        statsByMode[activeMode][name] + 1,
     },
   };
 
   snapshot = {
-    mode: 'optimized',
-    ...statsByMode.optimized,
+    mode: activeMode,
+    ...statsByMode[activeMode],
   };
 
-  listeners.forEach((listener) => {
-    listener();
-  });
+  notify();
 }
