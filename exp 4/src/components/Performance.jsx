@@ -18,27 +18,20 @@ function Performance({
     getRenderStats
   );
 
-  // Show actual counts only in Optimized mode.
-  // Non-optimized mode is displayed as 0.
-  const calendarViewRenders = optimized
-    ? renderStats.CalendarView || 0
-    : 0;
+  const calendarViewRenders =
+    renderStats.CalendarView || 0;
 
-  const calendarRenders = optimized
-    ? renderStats.Calendar || 0
-    : 0;
+  const calendarRenders =
+    renderStats.Calendar || 0;
 
-  const eventRenders = optimized
-    ? renderStats.Events || 0
-    : 0;
+  const eventRenders =
+    renderStats.Events || 0;
 
-  const postModalRenders = optimized
-    ? renderStats.PostModal || 0
-    : 0;
+  const postModalRenders =
+    renderStats.PostModal || 0;
 
-  const sidebarRenders = optimized
-    ? renderStats.Sidebar || 0
-    : 0;
+  const sidebarRenders =
+    renderStats.Sidebar || 0;
 
   const totalRenders =
     calendarViewRenders +
@@ -117,8 +110,8 @@ function Performance({
       </div>
 
       <p className="render-performance-note">
-        Optimized mode shows tracked render activity.
-        Non-optimized mode displays zero for comparison.
+        Switch between optimized and non-optimized
+        modes to compare React rendering activity.
       </p>
     </section>
   );

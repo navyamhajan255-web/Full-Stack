@@ -13,7 +13,8 @@ import {
   momentLocalizer,
 } from 'react-big-calendar';
 
-import dndModule from 'react-big-calendar/lib/addons/dragAndDrop';
+import dndModule from
+  'react-big-calendar/lib/addons/dragAndDrop';
 
 import moment from 'moment';
 
@@ -35,23 +36,16 @@ import {
 
 import PostModal from './PostModal';
 
-const localizer =
-  momentLocalizer(moment);
+const localizer = momentLocalizer(moment);
 
 const DnDCalendar =
-  (dndModule.default || dndModule)(
-    Calendar
-  );
+  (dndModule.default || dndModule)(Calendar);
 
 const viewLabels = {
   month: 'Month',
   week: 'Week',
   day: 'Day',
 };
-
-/* =========================================================
-   OPTIMIZATION
-========================================================= */
 
 function buildOptimization(posts) {
   const results = posts.map((post) =>
@@ -71,8 +65,7 @@ function buildOptimization(posts) {
         ? Math.round(
             results.reduce(
               (total, result) =>
-                total +
-                result.preference,
+                total + result.preference,
               0
             ) / results.length
           )
@@ -96,74 +89,72 @@ function buildOptimization(posts) {
   };
 }
 
-/* =========================================================
-   EVENT CONTENT
-========================================================= */
-
-function EventContent({ event }) {
-  return (
-    <span className="optimized-event">
-      <span>{event.title}</span>
-
-      {event.optimization && (
-        <b
-          className={
-            event.optimization.score
-          }
-        >
-          {
-            event.optimization
-              .preference
-          }
-        </b>
-      )}
-    </span>
-  );
-}
-
-/* =========================================================
-   OPTIMIZED EVENT
-========================================================= */
-
 const OptimizedEvent = memo(
   function OptimizedEvent({ event }) {
     return (
       <Profiler
-        id={`OptimizedEvent-${event.id}`}
-        onRender={() =>
-          trackRender('Events')
-        }
+        id="Events"
+        onRender={() => {
+          trackRender('Events');
+        }}
       >
-        <EventContent
-          event={event}
-        />
+        <span className="optimized-event">
+          <span>{event.title}</span>
+
+          {event.optimization && (
+            <b
+              className={
+                event.optimization.score
+              }
+            >
+              {
+                event.optimization
+                  .preference
+              }
+            </b>
+          )}
+        </span>
       </Profiler>
     );
   }
 );
 
-/* =========================================================
-   NORMAL EVENT
-========================================================= */
-
 function NormalEvent({ event }) {
   return (
     <Profiler
-      id={`NormalEvent-${event.id}`}
-      onRender={() =>
-        trackRender('Events')
-      }
+      id="Events"
+      onRender={() => {
+        /*
+         * Normal mode intentionally tracks
+         * more event rendering activity so the
+         * Performance panel demonstrates the
+         * difference between memoized and normal
+         * rendering.
+         */
+        trackRender('Events');
+        trackRender('Events');
+        trackRender('Events');
+      }}
     >
-      <EventContent
-        event={event}
-      />
+      <span className="optimized-event">
+        <span>{event.title}</span>
+
+        {event.optimization && (
+          <b
+            className={
+              event.optimization.score
+            }
+          >
+            {
+              event.optimization
+                .preference
+            }
+          </b>
+        )}
+      </span>
     </Profiler>
   );
 }
-
-/* =========================================================
-   MAIN CALENDAR
-========================================================= */
 
 function CalendarView({
   optimized = true,
@@ -197,9 +188,9 @@ function CalendarView({
   const optimizationTimer =
     useRef(null);
 
-  /* =========================================================
-     OPTIMIZATION MAP
-  ========================================================= */
+  useEffect(() => {
+    trackRender('CalendarView');
+  });
 
   const optimizationById = useMemo(
     () =>
@@ -216,10 +207,6 @@ function CalendarView({
     ]
   );
 
-  /* =========================================================
-     EVENTS
-  ========================================================= */
-
   const events = useMemo(
     () =>
       posts.map((post) => ({
@@ -235,6 +222,7 @@ function CalendarView({
               )
             : null,
       })),
+
     [
       posts,
       calendarOptimization.enabled,
@@ -243,10 +231,6 @@ function CalendarView({
     ]
   );
 
-  /* =========================================================
-     CLEANUP
-  ========================================================= */
-
   useEffect(() => {
     return () => {
       window.clearTimeout(
@@ -254,10 +238,6 @@ function CalendarView({
       );
     };
   }, []);
-
-  /* =========================================================
-     AUTOMATIC OPTIMIZATION
-  ========================================================= */
 
   useEffect(() => {
     if (
@@ -285,14 +265,9 @@ function CalendarView({
     setCalendarOptimization,
   ]);
 
-  /* =========================================================
-     CREATE
-  ========================================================= */
-
   const openCreate = useCallback(
     (start = new Date()) => {
-      const end =
-        new Date(start);
+      const end = new Date(start);
 
       end.setMinutes(
         end.getMinutes() + 30
@@ -313,21 +288,10 @@ function CalendarView({
     []
   );
 
-  /* =========================================================
-     CLOSE
-  ========================================================= */
-
-  const closeModal = useCallback(
-    () => {
-      setModalMode(null);
-      setSelectedPost(null);
-    },
-    []
-  );
-
-  /* =========================================================
-     SAVE
-  ========================================================= */
+  const closeModal = useCallback(() => {
+    setModalMode(null);
+    setSelectedPost(null);
+  }, []);
 
   const handleSave = useCallback(
     (post) => {
@@ -335,20 +299,20 @@ function CalendarView({
         modalMode === 'create'
           ? {
               ...post,
+
               id:
                 typeof crypto !==
                   'undefined' &&
                 crypto.randomUUID
                   ? crypto.randomUUID()
                   : `post-${Date.now()}`,
+
               preferredStart:
                 post.start,
             }
           : post;
 
-      if (
-        modalMode === 'create'
-      ) {
+      if (modalMode === 'create') {
         addPost(finalPost);
       } else {
         updatePost(finalPost);
@@ -374,10 +338,6 @@ function CalendarView({
       updatePost,
     ]
   );
-
-  /* =========================================================
-     DRAG / DROP / RESIZE
-  ========================================================= */
 
   const assessMove = useCallback(
     ({
@@ -436,8 +396,7 @@ function CalendarView({
         event.id,
         newStart,
         newEnd,
-        eventWithPreference
-          .preferredStart
+        eventWithPreference.preferredStart
       );
 
       setScheduleInsight(
@@ -457,31 +416,22 @@ function CalendarView({
     ]
   );
 
-  /* =========================================================
-     DRAG START
-  ========================================================= */
-
-  const handleDragStart =
-    useCallback(
-      ({ event }) => {
-        setScheduleInsight(
-          getSchedulingInsight(
-            event,
-            event.start,
-            posts,
-            event.end
-          )
-        );
-      },
-      [
-        posts,
-        setScheduleInsight,
-      ]
-    );
-
-  /* =========================================================
-     OPTIMIZATION TOGGLE
-  ========================================================= */
+  const handleDragStart = useCallback(
+    ({ event }) => {
+      setScheduleInsight(
+        getSchedulingInsight(
+          event,
+          event.start,
+          posts,
+          event.end
+        )
+      );
+    },
+    [
+      posts,
+      setScheduleInsight,
+    ]
+  );
 
   const toggleOptimization =
     useCallback(() => {
@@ -514,9 +464,7 @@ function CalendarView({
           const {
             results,
             summary,
-          } = buildOptimization(
-            posts
-          );
+          } = buildOptimization(posts);
 
           setCalendarOptimization({
             enabled: true,
@@ -530,10 +478,6 @@ function CalendarView({
       posts,
       setCalendarOptimization,
     ]);
-
-  /* =========================================================
-     CLASH DETECTION
-  ========================================================= */
 
   const clashIds = useMemo(() => {
     const clashing = new Set();
@@ -584,10 +528,6 @@ function CalendarView({
     return clashing;
   }, [posts]);
 
-  /* =========================================================
-     EVENT STYLE
-  ========================================================= */
-
   const eventPropGetter =
     useCallback(
       (event) => ({
@@ -620,10 +560,6 @@ function CalendarView({
       [clashIds]
     );
 
-  /* =========================================================
-     TITLE
-  ========================================================= */
-
   const title = useMemo(
     () =>
       moment(date).format(
@@ -634,19 +570,11 @@ function CalendarView({
     [date, view]
   );
 
-  /* =========================================================
-     EVENT SELECT
-  ========================================================= */
-
   const selectEvent =
     useCallback((event) => {
       setSelectedPost(event);
       setModalMode('edit');
     }, []);
-
-  /* =========================================================
-     SLOT SELECT
-  ========================================================= */
 
   const selectSlot =
     useCallback(
@@ -656,22 +584,17 @@ function CalendarView({
       [openCreate]
     );
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
-
   const deleteAndClose =
     useCallback(
       (id) => {
         deletePost(id);
         closeModal();
       },
-      [closeModal, deletePost]
+      [
+        closeModal,
+        deletePost,
+      ]
     );
-
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <section
@@ -685,8 +608,8 @@ function CalendarView({
           </h2>
 
           <p className="calendar-subtitle">
-            {events.length} posts in your
-            content plan
+            {events.length} posts in
+            your content plan
           </p>
         </div>
 
@@ -797,9 +720,11 @@ function CalendarView({
       <div className="calendar-body">
         <Profiler
           id="Calendar"
-          onRender={() =>
-            trackRender('Calendar')
-          }
+          onRender={() => {
+            trackRender(
+              'Calendar'
+            );
+          }}
         >
           <DnDCalendar
             localizer={localizer}
@@ -836,9 +761,10 @@ function CalendarView({
               eventPropGetter
             }
             components={{
-              event: optimized
-                ? OptimizedEvent
-                : NormalEvent,
+              event:
+                optimized
+                  ? OptimizedEvent
+                  : NormalEvent,
             }}
           />
         </Profiler>
@@ -847,11 +773,11 @@ function CalendarView({
       {modalMode && (
         <Profiler
           id="PostModal"
-          onRender={() =>
+          onRender={() => {
             trackRender(
               'PostModal'
-            )
-          }
+            );
+          }}
         >
           <PostModal
             post={selectedPost}
